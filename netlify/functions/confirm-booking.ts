@@ -17,34 +17,36 @@ export const handler: Handler = async (event, context) => {
       };
     }
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.CLAUDE_API_KEY,
-    });
-
     const prompt = `You are a friendly assistant for a small business. 
 A customer with email ${email} just booked a ${service} appointment for ${new Date(time).toLocaleString()}.
 Generate a short, warm, and personalized confirmation message (max 3 sentences) to send them.
 Make it sound enthusiastic but professional. Don't include subject lines, just the message body.`;
 
+    // claude wanted me to pay here but I just setup a mock response instead. 
+
+
+    /*
+    const anthropic = new Anthropic({
+      apiKey: process.env.CLAUDE_API_KEY,
+    });
+
     const msg = await anthropic.messages.create({
       model: "claude-3-haiku-20240307",
       max_tokens: 150,
       temperature: 0.7,
-      messages: [
-        { role: "user", content: prompt }
-      ]
+      messages: [{ role: "user", content: prompt }]
     });
-
-    // Extract text from the response safely
     const responseText = msg.content.map(block => block.type === 'text' ? block.text : '').join('');
+    */
 
-    // Here, you would typically send an actual email (e.g. using Resend, Sendgrid, etc.)
-    // For this demo, we'll just log it and return it.
+    const responseText = `Hi there! Thank you so much for booking your ${service} appointment for ${new Date(time).toLocaleString()}. We are thrilled to see you and are preparing everything for your visit. If you need anything before then, please don't hesitate to reach out!`;
+
+    // sending a mock email, but this would be a real email sent to the user probably from Resend.
     console.log(`[Email to ${email}]:\n${responseText}`);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         message: 'Confirmation generated and logged',
         content: responseText
       }),

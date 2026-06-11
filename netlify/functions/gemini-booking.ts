@@ -14,7 +14,7 @@ export const handler: Handler = async (event) => {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const systemPrompt = `You are a helpful assistant parsing natural language appointment requests.
 The current date and time for the user is: ${clientDate}.
@@ -41,7 +41,7 @@ Respond ONLY with a valid JSON object matching this schema:
     console.error('Gemini NLP Error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to process natural language request' }),
+      body: JSON.stringify({ error: 'Failed to process natural language request', details: error.message }),
     };
   }
 };

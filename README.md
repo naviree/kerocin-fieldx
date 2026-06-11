@@ -32,16 +32,6 @@ npm install
 npx netlify-cli dev
 ```
 
-Netlify CLI is used so the frontend and serverless functions run together during local development.
-
-### 4. Create a Test Account
-
-Authentication is handled through Supabase Auth.
-
-You can register with any test email. If email verification is enabled in your Supabase project, disable **Confirm Email** under Auth settings for easier testing.
-
----
-
 ## Tech Stack
 
 - React
@@ -77,31 +67,4 @@ WHERE status = 'confirmed';
 
 This prevents race conditions by ensuring PostgreSQL remains the source of truth. If multiple users attempt to book the same slot simultaneously, only one transaction succeeds.
 
----
 
-## AI Confirmation Messages
-
-A Netlify serverless function (`confirm-booking.ts`) is responsible for generating booking confirmation messages using the Claude API.
-
-For demonstration purposes, the API request is currently mocked so the project can be run without an Anthropic API key. The production integration and prompt logic remain in the codebase.
-
----
-
-## Future Improvements
-
-Given additional time, I would focus on:
-
-- **Supabase Realtime** for instant availability updates across clients
-- **Email delivery integration** using Resend or SendGrid
-- **Admin dashboard** for managing bookings and schedules
-- **Automated testing** for critical booking flows
-
----
-
-## Key Design Goals
-
-- Keep the architecture simple
-- Enforce security at the database layer
-- Prevent booking conflicts reliably
-- Avoid unnecessary backend complexity
-- Deliver a polished user experience with minimal dependencies

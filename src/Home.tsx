@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
-import { addDays, format, startOfToday, setHours, setMinutes, parseISO, isBefore } from 'date-fns';
+import { addDays, format, startOfToday, setHours, setMinutes, isBefore } from 'date-fns';
 
 export default function Home({ session }: { session: any }) {
   const [slots, setSlots] = useState<Date[]>([]);

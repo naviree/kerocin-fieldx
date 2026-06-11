@@ -1,48 +1,107 @@
-# Booking App
+# Simple Booking App
 
-A simple booking app for a small business allowing customers to book time slots securely. Built for the candidate brief.
+A lightweight appointment booking application built with **React, TypeScript, Vite, Supabase, and Netlify Functions**.
 
-## How to run it
+The goal of this project was to build a reliable booking experience while keeping the architecture simple and maintainable.
 
-1. **Prerequisites**: Node.js, an active Supabase project, and a Claude API Key.
-2. **Setup Supabase**:
-   - Run the SQL script located in `supabase/schema.sql` in your Supabase SQL Editor. This sets up the database, RLS policies, and view for available slots.
-3. **Environment variables**:
-   - Copy `.env.example` to `.env` and fill in your `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-   - For Netlify deployment, make sure to add `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `CLAUDE_API_KEY` to your Netlify site's Environment Variables.
-4. **Install & Run Locally**:
-   ```bash
-   npm install
-   # We use Netlify CLI for local dev to enable edge functions
-   npx netlify-cli dev
-   ```
-5. **Test Credentials**:
-   - Since Supabase Auth is enabled, you can sign up normally with any email. Supabase might require email confirmation unless you turn off "Confirm email" in Supabase Auth settings. 
+## Running Locally
 
-## Architecture & Tradeoffs
+### 1. Set Up Supabase
 
-- **Frontend**: Vite + React + TypeScript + React Router. Chosen for its speed and simplicity. 
-- **Styling**: Vanilla CSS. Opted for no heavy UI frameworks to keep the bundle small and maintain fine-grained control over a premium dark-mode look.
-- **Backend/DB**: Supabase (PostgreSQL). We leverage Row Level Security (RLS) heavily so the frontend can securely talk directly to the database without a middle tier.
-- **Serverless**: Netlify Functions. Used solely to run the Claude API securely on the server side (`/.netlify/functions/confirm-booking`), preventing the API key from leaking to the client.
+Create a Supabase project and run the contents of `supabase/schema.sql` in the SQL Editor.
 
-**Tradeoffs**:
-- Computed availability vs static slots: Instead of generating `slots` in the database, the frontend dynamically calculates business hours and subtracts `public_booked_slots`. This means no cron job is needed to populate slots, making the app much simpler to maintain.
+This creates:
 
-## Double-booking Prevention
+- `bookings` table
+- Row Level Security (RLS) policies
+- Availability view used by the frontend
 
-Double booking is prevented at the **database level** via a partial unique index:
+### 2. Configure Environment Variables
+
+Rename `.env.example` to `.env` and add:
+
+```bash
+VITE_SUPABASE_URL=your_project_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+```
+
+### 3. Start the Application
+
+```bash
+npm install
+npx netlify-cli dev
+```
+
+Netlify CLI is used so the frontend and serverless functions run together during local development.
+
+### 4. Create a Test Account
+
+Authentication is handled through Supabase Auth.
+
+You can register with any test email. If email verification is enabled in your Supabase project, disable **Confirm Email** under Auth settings for easier testing.
+
+---
+
+## Tech Stack
+
+- React
+- TypeScript
+- Vite
+- Supabase (Database + Authentication)
+- Netlify Functions
+- Vanilla CSS
+
+---
+
+## Architecture Notes
+
+### Database-Driven Security
+
+The application relies on Supabase Row Level Security rather than frontend restrictions. This ensures users can only access their own booking data even when communicating directly with the database.
+
+### Dynamic Availability
+
+Instead of maintaining a dedicated `slots` table, available appointment times are generated dynamically based on business hours.
+
+The frontend checks availability against a database view that exposes confirmed booking times. This approach eliminates the need to pre-generate and maintain future appointment records while keeping the data model simple.
+
+### Preventing Double Bookings
+
+Double-booking protection is enforced at the database layer:
+
 ```sql
-CREATE UNIQUE INDEX bookings_start_time_unique 
-ON bookings (start_time) 
+CREATE UNIQUE INDEX bookings_start_time_unique
+ON bookings (start_time)
 WHERE status = 'confirmed';
 ```
-Even if two users try to book the exact same slot at the exact same millisecond, the PostgreSQL database will enforce this constraint and reject one of the transactions. No application-level race conditions are possible.
 
-## Next Steps / Skipped Items
+This prevents race conditions by ensuring PostgreSQL remains the source of truth. If multiple users attempt to book the same slot simultaneously, only one transaction succeeds.
 
-- **Realtime updates**: Skipped using Supabase Realtime for live slot updates to ensure core features were rock solid in the time constraint.
-- **Admin View**: Did not build the admin dashboard for managing all bookings.
-- **Reminders**: A scheduled function (e.g. Supabase pg_cron or Netlify Scheduled Functions) sending 24-hour reminders was skipped.
-- **Natural language booking**: Did not integrate Claude tool use for "book me a haircut next Tuesday".
-- **Email delivery**: The Claude confirmation function just logs the generated email text instead of integrating with Resend/SendGrid.
+---
+
+## AI Confirmation Messages
+
+A Netlify serverless function (`confirm-booking.ts`) is responsible for generating booking confirmation messages using the Claude API.
+
+For demonstration purposes, the API request is currently mocked so the project can be run without an Anthropic API key. The production integration and prompt logic remain in the codebase.
+
+---
+
+## Future Improvements
+
+Given additional time, I would focus on:
+
+- **Supabase Realtime** for instant availability updates across clients
+- **Email delivery integration** using Resend or SendGrid
+- **Admin dashboard** for managing bookings and schedules
+- **Automated testing** for critical booking flows
+
+---
+
+## Key Design Goals
+
+- Keep the architecture simple
+- Enforce security at the database layer
+- Prevent booking conflicts reliably
+- Avoid unnecessary backend complexity
+- Deliver a polished user experience with minimal dependencies

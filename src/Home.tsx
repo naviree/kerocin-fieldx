@@ -43,7 +43,7 @@ export default function Home({ session }: { session: any }) {
       if (error) throw error;
       
       if (data) {
-        setBookedSlots(data.map(item => item.start_time));
+        setBookedSlots(data.map(item => new Date(item.start_time).toISOString()));
       }
     } catch (error) {
       console.error('Error fetching slots:', error);
@@ -133,8 +133,8 @@ export default function Home({ session }: { session: any }) {
                     onClick={() => !isBooked && !isLoading && handleBookSlot(slot)}
                   >
                     <div className="slot-time">{format(slot, 'h:mm a')}</div>
-                    <div className={`slot-status ${!isBooked ? 'available' : ''}`}>
-                      {isLoading ? 'Booking...' : isBooked ? 'Booked' : 'Available'}
+                    <div className={`slot-status ${!isBooked ? 'available' : 'unavailable'}`}>
+                      {isLoading ? 'Booking...' : isBooked ? 'Unavailable' : 'Available'}
                     </div>
                   </div>
                 );

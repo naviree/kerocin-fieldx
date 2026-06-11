@@ -37,8 +37,8 @@ function App() {
             <nav className="nav-links">
               <Link to="/">Book</Link>
               <Link to="/my-bookings">My Bookings</Link>
-              <button 
-                className="secondary" 
+              <button
+                className="secondary"
                 onClick={() => supabase.auth.signOut()}
                 style={{ marginLeft: '1rem', padding: '6px 12px', fontSize: '0.9rem' }}
               >
@@ -50,17 +50,17 @@ function App() {
 
         <main>
           <Routes>
-            <Route 
-              path="/" 
-              element={session ? <Home session={session} /> : <Navigate to="/auth" />} 
+            <Route
+              path="/"
+              element={session ? <Home session={session} /> : <Navigate to="/auth" />}
             />
-            <Route 
-              path="/my-bookings" 
-              element={session ? <MyBookings session={session} /> : <Navigate to="/auth" />} 
+            <Route
+              path="/my-bookings"
+              element={session ? <MyBookings session={session} /> : <Navigate to="/auth" />}
             />
-            <Route 
-              path="/auth" 
-              element={!session ? <Auth /> : <Navigate to="/" />} 
+            <Route
+              path="/auth"
+              element={!session ? <Auth /> : <Navigate to="/" />}
             />
           </Routes>
         </main>

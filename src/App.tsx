@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase';
 import Auth from './Auth';
 import Home from './Home';
 import MyBookings from './MyBookings';
+import Admin from './Admin';
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -37,6 +38,9 @@ function App() {
             <nav className="nav-links">
               <Link to="/">Book</Link>
               <Link to="/my-bookings">My Bookings</Link>
+              {session?.user?.email === 'admin@example.com' && (
+                <Link to="/admin">Admin</Link>
+              )}
               <button
                 className="secondary"
                 onClick={() => supabase.auth.signOut()}
@@ -57,6 +61,10 @@ function App() {
             <Route
               path="/my-bookings"
               element={session ? <MyBookings session={session} /> : <Navigate to="/auth" />}
+            />
+            <Route
+              path="/admin"
+              element={session?.user?.email === 'admin@example.com' ? <Admin session={session} /> : <Navigate to="/" />}
             />
             <Route
               path="/auth"

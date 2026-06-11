@@ -7,10 +7,29 @@ export default function Home({ session }: { session: any }) {
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState<string | null>(null);
+  const [nlpPrompt, setNlpPrompt] = useState('');
+  const [nlpLoading, setNlpLoading] = useState(false);
 
   useEffect(() => {
     generateSlots();
     fetchBookedSlots();
+
+    // Stretch 11: Live slot updates via Supabase Realtime
+    const subscription = supabase
+      .channel('availability_changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'public_availability_changes' }, (payload) => {
+        const { start_time, status } = payload.new;
+        if (status === 'confirmed') {
+          setBookedSlots(prev => [...prev, new Date(start_time).toISOString()]);
+        } else if (status === 'cancelled') {
+          setBookedSlots(prev => prev.filter(time => time !== new Date(start_time).toISOString()));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const generateSlots = () => {
@@ -98,13 +117,65 @@ export default function Home({ session }: { session: any }) {
     }
   };
 
+  const handleNlpBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nlpPrompt) return;
+    
+    setNlpLoading(true);
+    try {
+      const response = await fetch('/.netlify/functions/gemini-booking', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          prompt: nlpPrompt,
+          clientDate: new Date().toLocaleString()
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.error) {
+        alert('AI says: ' + result.error);
+        return;
+      }
+
+      if (result.start_time) {
+        const slotDate = new Date(result.start_time);
+        if (confirm(`Do you want to book: ${format(slotDate, 'EEEE, MMMM d at h:mm a')}?`)) {
+          await handleBookSlot(slotDate);
+        }
+      }
+    } catch (err: any) {
+      alert('Error parsing request: ' + err.message);
+    } finally {
+      setNlpLoading(false);
+      setNlpPrompt('');
+    }
+  };
+
   if (loading) return <div className="loading">Loading slots...</div>;
 
   return (
     <div>
       <div style={{ marginBottom: '2rem' }}>
         <h2>Book a Consultation</h2>
-        <p style={{ color: '#888' }}>Select an available time slot below.</p>
+        <p style={{ color: '#888' }}>Select an available time slot below, or just type what you want!</p>
+      </div>
+
+      {/* Stretch 12: Natural Language Booking */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h3 style={{ marginBottom: '1rem' }}>✨ AI Quick Book</h3>
+        <form onSubmit={handleNlpBooking} style={{ display: 'flex', gap: '1rem' }}>
+          <input 
+            type="text" 
+            placeholder="e.g. 'book me a haircut next Tuesday at 2pm'" 
+            value={nlpPrompt}
+            onChange={(e) => setNlpPrompt(e.target.value)}
+            disabled={nlpLoading}
+          />
+          <button type="submit" disabled={nlpLoading || !nlpPrompt}>
+            {nlpLoading ? 'Thinking...' : 'Book'}
+          </button>
+        </form>
       </div>
       
       {/* Group slots by day */}

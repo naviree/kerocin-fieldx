@@ -14,7 +14,7 @@ export const handler: Handler = async (event) => {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const systemPrompt = `You are a helpful assistant parsing natural language appointment requests.
 The current date and time for the user is: ${clientDate}.

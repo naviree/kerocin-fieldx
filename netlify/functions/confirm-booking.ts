@@ -14,7 +14,7 @@ export const handler: Handler = async (event) => {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `You are a friendly assistant for a small business. 
 A customer with email ${email} just booked a ${service} appointment for ${new Date(time).toLocaleString()}.

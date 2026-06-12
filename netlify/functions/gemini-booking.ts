@@ -22,7 +22,7 @@ Extract the date and time they want to book.
 The business hours are strictly 9:00 AM to 5:00 PM. Appointments are exactly on the hour (e.g. 10:00 AM).
 Respond ONLY with a valid JSON object matching this schema:
 {
-  "start_time": "ISO 8601 Date String (e.g., 2026-06-16T14:00:00.000Z)",
+  "start_time": "ISO 8601 Date String including the user's specific timezone offset (e.g., 2026-06-16T14:00:00-07:00). DO NOT use Z (UTC) unless their timezone is UTC.",
   "error": "If the request is outside business hours or unclear, put a friendly error message here. Otherwise, null."
 }`;
 

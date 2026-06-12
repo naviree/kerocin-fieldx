@@ -127,7 +127,7 @@ export default function Home({ session }: { session: any }) {
         method: 'POST',
         body: JSON.stringify({ 
           prompt: nlpPrompt,
-          clientDate: new Date().toLocaleString()
+          clientDate: new Date().toString()
         }),
       });
       

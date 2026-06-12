@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { format, parseISO } from 'date-fns';
 
-export default function Admin({ session }: { session: any }) {
+export default function Admin({ session: _session }: { session: any }) {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
